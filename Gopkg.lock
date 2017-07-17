@@ -1,0 +1,7 @@
+memo = "30ff3df0c98f9e0ab92407ef35abfe90c95a6395ca20f4c583033dd7152395ad"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/altairsix/eventsource"
+  packages = ["."]
+  revision = "98d88487d1d31dd1d56754dbc365b00856afdaea"
