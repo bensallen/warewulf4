@@ -13,6 +13,7 @@ type Bootstrap struct {
 	Version      int
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	State        string
 	Arch         string
 	Path         string
 	Checksum     string
@@ -35,7 +36,10 @@ type BootstrapChanged struct {
 	CompressAlgo string
 }
 
-type BootstrapDelete struct {
+//BootstrapDeleted represents the event of the bootstrap files being deleted
+type BootstrapDeleted struct {
+	eventsource.Model
+	State string
 }
 
 //On parses an event and applies the event's changes to the Bootstrap object
@@ -67,6 +71,10 @@ func (b *Bootstrap) On(event eventsource.Event) error {
 		if e.CompressAlgo != "" {
 			b.CompressAlgo = e.CompressAlgo
 		}
+	case *BootstrapDeleted:
+		b.Version = e.Model.Version
+		b.UpdatedAt = e.At
+		b.State = "Deleted"
 
 	default:
 		return fmt.Errorf("unhandled event, %v", e)
