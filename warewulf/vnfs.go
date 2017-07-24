@@ -50,7 +50,7 @@ type VNFSDeleted struct {
 	State string
 }
 
-//On parses an event and applies the event's changes to the VNFS object
+//On parses event types and applies the event's changes to the VNFS object
 func (v *VNFS) On(event eventsource.Event) error {
 	switch e := event.(type) {
 	case *VNFSCreated:
@@ -139,13 +139,15 @@ type UpdateVNFS struct {
 //DeleteVNFS represents the command to delete VNFS files
 type DeleteVNFS struct {
 	eventsource.CommandModel
-	State string
 }
 
 //Apply implements the CommandHandler interface for VNFS
 func (v *VNFS) Apply(ctx context.Context, command eventsource.Command) ([]eventsource.Event, error) {
 	switch c := command.(type) {
 	case *CreateVNFS:
+		if v.State != "" {
+			return nil, fmt.Errorf("VNFS, %v, already exists, use an UpdateVNFS type instead", command.AggregateID())
+		}
 		vnfsCreated := &VNFSCreated{
 			Model:        eventsource.Model{ID: command.AggregateID(), Version: v.Version + 1, At: time.Now()},
 			Arch:         c.Arch,
