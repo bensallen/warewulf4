@@ -220,11 +220,13 @@ func TestVNFSApply(t *testing.T) {
 		if vers != 3 {
 			t.Fatalf("Version, %d, not incremented on apply", vers)
 		}
-		aggregate, err := repo.Load(ctx, vnfsID)
+
+		vnfs := VNFS{ID: vnfsID}
+		err = vnfs.Read(ctx, repo)
 		if err != nil {
 			t.Fatalf("Error: %v", err)
 		}
-		vnfs := aggregate.(*VNFS)
+
 		if vnfs.State != "Deleted" {
 			t.Fatalf("State not updated to deleted, set to %s instead", vnfs.State)
 		}
