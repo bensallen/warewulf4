@@ -23,6 +23,78 @@ type VNFS struct {
 	CompressAlgo string
 }
 
+// Create saves a new VNFS by building a CreateVNFS command and appling it against the repository.
+func (v *VNFS) Create(ctx context.Context, repo *eventsource.Repository) error {
+	if v.ID == "" {
+		return fmt.Errorf("ID of VNFS must be specified")
+	}
+
+	createVNFS := CreateVNFS{
+		CommandModel: eventsource.CommandModel{ID: v.ID},
+		Arch:         v.Arch,
+		Path:         v.Path,
+		Checksum:     v.Checksum,
+		Size:         v.Size,
+		CompressAlgo: v.CompressAlgo,
+	}
+
+	_, err := repo.Apply(ctx, createVNFS)
+	return err
+}
+
+// Read attemps to fetch the VNFS aggregrate from the event repository. v.ID must be specified
+// as it is used the aggregate ID.
+func (v *VNFS) Read(ctx context.Context, repo *eventsource.Repository) error {
+	if v.ID == "" {
+		return fmt.Errorf("ID of VNFS must be specified")
+	}
+
+	aggregate, err := repo.Load(ctx, v.ID)
+	if aggregate == nil {
+		return fmt.Errorf("VNFS not found")
+	}
+
+	vnfs, ok := aggregate.(*VNFS)
+
+	if !ok {
+		return fmt.Errorf("ID returned an aggregate that is not a VNFS")
+	}
+
+	// Copy values of casted aggregigate to *v
+	*v = *vnfs
+
+	return err
+}
+
+func (v *VNFS) Update(repo *eventsource.Repository, ctx context.Context) error {
+	if v.ID == "" {
+		return fmt.Errorf("ID of VNFS must be specified")
+	}
+	updateVNFS := UpdateVNFS{
+		CommandModel: eventsource.CommandModel{ID: v.ID},
+		Arch:         v.Arch,
+		Path:         v.Path,
+		Checksum:     v.Checksum,
+		Size:         v.Size,
+		CompressAlgo: v.CompressAlgo,
+	}
+
+	_, err := repo.Apply(ctx, updateVNFS)
+	return err
+
+}
+
+func (v *VNFS) Delete(repo *eventsource.Repository, ctx context.Context) error {
+	if v.ID == "" {
+		return fmt.Errorf("ID of VNFS must be specified")
+	}
+	deleteVNFS := DeleteVNFS{
+		CommandModel: eventsource.CommandModel{ID: v.ID},
+	}
+	_, err := repo.Apply(ctx, deleteVNFS)
+	return err
+}
+
 //VNFSCreated represents the event of the bootstrap being created
 type VNFSCreated struct {
 	eventsource.Model
